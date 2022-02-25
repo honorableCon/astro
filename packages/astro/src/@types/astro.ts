@@ -56,7 +56,9 @@ export interface AstroGlobal extends AstroGlobalPartial {
 }
 
 export interface AstroGlobalPartial {
-	fetchContent<T = any>(globStr: string): Promise<FetchContentResult<T>[]>;
+	/** @deprecated Use `Astro.glob()` instead. */
+	fetchContent(globStr: string): Promise<any[]>;
+	glob<T = any>(globStr: string): Promise<T[]>;
 	resolve: (path: string) => string;
 	site: URL;
 }
@@ -443,20 +445,7 @@ export interface ComponentInstance {
 	getStaticPaths?: (options: GetStaticPathsOptions) => GetStaticPathsResult;
 }
 
-/**
- * Astro.fetchContent() result
- * Docs: https://docs.astro.build/reference/api-reference/#astrofetchcontent
- */
-export type FetchContentResult<T> = FetchContentResultBase & T;
-
-export type FetchContentResultBase = {
-	astro: {
-		headers: string[];
-		source: string;
-		html: string;
-	};
-	url: string;
-};
+/* TODO: Define Markdown Type? */
 
 export type GetHydrateCallback = () => Promise<(element: Element, innerHTML: string | null) => void>;
 

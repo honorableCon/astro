@@ -5,6 +5,8 @@ import type { AstroConfig } from '../@types/astro';
 import * as babelTraverse from '@babel/traverse';
 import * as babel from '@babel/core';
 
+// Check for `Astro.glob()`. Be very forgiving of whitespace. False positives are okay.
+const ASTRO_GLOB_REGEX = /Astro2?\s*\.\s*glob\s*\(/;
 interface AstroPluginOptions {
 	config: AstroConfig;
 }
@@ -21,9 +23,9 @@ export default function astro({ config }: AstroPluginOptions): Plugin {
 				return null;
 			}
 
-			// Optimization: only run on a probably match
-			// Open this up if need for post-pass extends past fetchContent
-			if (!code.includes('fetchContent')) {
+			// Optimization: Detect usage with a quick string match.
+			// Only perform the transform if this function is found
+			if (!ASTRO_GLOB_REGEX.test(code)) {
 				return null;
 			}
 
@@ -40,7 +42,7 @@ export default function astro({ config }: AstroPluginOptions): Plugin {
 										path.parent.type !== 'CallExpression' ||
 										path.parent.callee.type !== 'MemberExpression' ||
 										!validAstroGlobalNames.has((path.parent.callee.object as any).name) ||
-										(path.parent.callee.property as any).name !== 'fetchContent'
+										(path.parent.callee.property as any).name !== 'glob'
 									) {
 										return;
 									}
